@@ -1,50 +1,132 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import useApiHandler from '@/hooks/useapicall';
+import Cookies from 'js-cookie';
+import { useDispatch } from 'react-redux';
+import { changeUserState } from '@/redux/slices/Authslice';
+import { useNavigate } from 'react-router-dom';
+import { showErrorToast } from '@/utilities/toastutils';
 
 const LoginSignupPage = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const apicaller = useApiHandler();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const onSubmit = async (formData) => {
+    if (!isLogin && formData.password !== formData.confirmpassword) {
+      return showErrorToast("Passwords do not match");
+    }
+
+    const payload = isLogin
+      ? { email: formData.email, password: formData.password }
+      : {
+        fullname: formData.fullname,
+        email: formData.email,
+        password: formData.password,
+        confirmpassword: formData.confirmpassword,
+      };
+
+    const url = isLogin ? "/api/auth/login" : "/api/auth/signup";
+
+    try {
+      const response = await apicaller(url, "POST", payload);
+     
+        const token = response?.data?.token;
+        localStorage.setItem("token", token);
+        
+        dispatch(changeUserState(true));
+        navigate("/main");
+      
+    } catch (e) {
+      showErrorToast(e.message || "Something went wrong");
+    }
+  };
 
   return (
-    <div className="bg-white text-gray-800 pb-24">
-      {/* Hero Section */}
+    <div className="bg-white text-gray-800 pb-24 overflow-y-hidden">
       <section className="flex flex-col md:flex-row min-h-screen">
-        {/* Form Area */}
         <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12">
           <Card className="w-full max-w-md shadow-2xl">
             <CardContent>
               <h2 className="text-2xl font-bold text-center mb-4">
                 {isLogin ? 'Login to CollagePrep' : 'Sign Up for CollagePrep'}
               </h2>
-              <form className="space-y-4">
+
+              <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
                 {!isLogin && (
-                  <div>
-                    <Label>Username</Label>
-                    <Input type="text" placeholder="Your name" required />
+                  <div className='flex flex-col gap-1.5'>
+                    <Label>Student Name</Label>
+                    <Input
+                      type="text"
+                      {...register("fullname", {
+                        required: "Full name is required"
+                      })}
+                      placeholder="Your name"
+                    />
+                    {errors.fullname && <span className="text-red-500 text-sm">{errors.fullname.message}</span>}
                   </div>
                 )}
-                <div>
+
+                <div className='flex flex-col gap-1.5'>
                   <Label>Email</Label>
-                  <Input type="email" placeholder="you@example.com" required />
+                  <Input
+                    type="email"
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: {
+                        value: /\S+@\S+\.\S+/,
+                        message: "Invalid email format"
+                      }
+                    })}
+                    placeholder="you@example.com"
+                  />
+                  {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
                 </div>
-                <div>
+
+                <div className='flex flex-col gap-1.5'>
                   <Label>Password</Label>
-                  <Input type="password" placeholder="••••••••" required />
+                  <Input
+                    type="password"
+                    {...register("password", {
+                      required: "Password is required",
+                      minLength: {
+                        value: 6,
+                        message: "Password must be at least 6 characters"
+                      }
+                    })}
+                    placeholder="••••••••"
+                  />
+                  {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
                 </div>
+
                 {!isLogin && (
-                  <div>
+                  <div className='flex flex-col gap-1.5'>
                     <Label>Confirm Password</Label>
-                    <Input type="password" placeholder="••••••••" required />
+                    <Input
+                      type="password"
+                      {...register("confirmpassword", {
+                        required: "Confirm password is required",
+                        validate: (value) => value === watch('password') || "Passwords do not match"
+                      })}
+                      placeholder="••••••••"
+                    />
+                    {errors.confirmpassword && <span className="text-red-500 text-sm">{errors.confirmpassword.message}</span>}
                   </div>
                 )}
+
                 <Button className="w-full" type="submit">
                   {isLogin ? 'Login' : 'Sign Up'}
                 </Button>
               </form>
+
               <p className="text-center text-sm text-gray-600 mt-4">
-                {isLogin ? 'Don\'t have an account?' : 'Already have an account?'}{' '}
+                {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
                 <button
                   className="text-indigo-600 hover:underline"
                   onClick={() => setIsLogin(!isLogin)}
@@ -61,32 +143,9 @@ const LoginSignupPage = () => {
           <img
             src="https://illustrations.popsy.co/gray/studying.svg"
             alt="Student Illustration"
-            className="w-full h-auto rounded-xl shadow-lg"
+            className="w-full h-full rounded-xl shadow-lg"
           />
         </div>
-      </section>
-
-      {/* Extra Sections */}
-      <section className="bg-indigo-50 py-12 text-center px-4">
-        <h2 className="text-3xl font-bold mb-2 text-indigo-700">Everything a MANITian Needs</h2>
-        <p className="max-w-xl mx-auto text-gray-700">
-          Get access to curated notes, previous year papers, useful YouTube playlists, and recommended books — all in one place. CollagePrep is built by students, for students.
-        </p>
-      </section>
-
-      <section className="grid md:grid-cols-3 gap-6 px-6 py-10 max-w-6xl mx-auto">
-        <Card className="p-4 text-center">
-          <h3 className="text-xl font-semibold text-indigo-700">Notes</h3>
-          <p className="text-gray-600 mt-2">Download handwritten and digital notes from toppers and professors.</p>
-        </Card>
-        <Card className="p-4 text-center">
-          <h3 className="text-xl font-semibold text-indigo-700">Previous Year Papers</h3>
-          <p className="text-gray-600 mt-2">Prepare efficiently using solved and unsolved past papers by subject.</p>
-        </Card>
-        <Card className="p-4 text-center">
-          <h3 className="text-xl font-semibold text-indigo-700">Video Resources</h3>
-          <p className="text-gray-600 mt-2">Access curated YouTube playlists and concept explanation videos.</p>
-        </Card>
       </section>
     </div>
   );

@@ -11,20 +11,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import useApiHandler from "@/hooks/useapicall";
+import { showErrorToast } from "@/utilities/toastutils";
 
 const Upload = () => {
   const [contributor, setContributor] = useState("");
   const [title, setTitle] = useState("");
   const [course, setCourse] = useState("");
-  const [semester, setSemester] = useState("");
+  const [semester, setSemester] = useState();
   const [branch, setBranch] = useState("");
   const [subject, setSubject] = useState("");
   const [uploadType, setUploadType] = useState("");
   const [file, setFile] = useState(null);
+  const [year, setyear] = useState();
   const [youtubeLink, setYoutubeLink] = useState("");
+  const [examyear, setExamyear] = useState();
+  const apicaller = useApiHandler();
 
-  const handleSubmit = (e) => {
+  console.log(file)
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!title || !course || !semester || !branch || !subject || !uploadType) {
       toast.error("⚠️ Please fill all required fields.");
       return;
@@ -43,18 +51,69 @@ const Upload = () => {
       return;
     }
 
-    toast.success("✅ Files uploaded successfully. Thank you for your contribution!");
+    // const payload = {
+    //   title,
+    //   type: uploadType,
+    //   year,
+    //   semester,
+    //   subject,
+    //   department: branch,
+    //   examyear,
+    //   ...(uploadType === "youtube"
+    //     ? { youtubeLinks: youtubeLink }
+    //     : { files: file[0] }),
+    // };
+    // console.log("payload", payload);
+
+
+    const formData = new FormData();
+formData.append("title", title);
+formData.append("type", uploadType);
+formData.append("year", year);
+formData.append("semester", semester);
+formData.append("subject", subject);
+formData.append("department", branch);
+formData.append("examyear", examyear);
+
+if (uploadType === "youtube") {
+  formData.append("youtubeLinks", youtubeLink);
+} else {
+  if (file?.length > 0) {
+    // Append as array item (even if single) to match multer.array("files")
+    formData.append("files", file[0]);
+  }
+}
+
+    try {
+      const response = await apicaller("/api/auth/upload", "POST", formData);
+      console.log("heyy");
+      
+      if(!response.data.success)
+      {
+        showErrorToast("File Already exist")
+      }
+      
+    } catch (e) {
+      console.error(e);
+      toast.error(e?.response?.data?.message);
+    }
+
+
+
+
+
+    // toast.success("✅ Files uploaded successfully. Thank you for your contribution!");
 
     // Clear form
-    setContributor("");
-    setTitle("");
-    setCourse("");
-    setSemester("");
-    setBranch("");
-    setSubject("");
-    setUploadType("");
-    setFile(null);
-    setYoutubeLink("");
+    // setContributor("");
+    // setTitle("");
+    // setCourse("");
+    // setSemester("");
+    // setBranch("");
+    // setSubject("");
+    // setUploadType("");
+    // setFile(null);
+    // setYoutubeLink("");
   };
 
   return (
@@ -103,10 +162,26 @@ const Upload = () => {
               </SelectContent>
             </Select>
           </div>
+          <div>
+            <Label>Select Year</Label>
+            <Select value={year?.toString() || ""} onValueChange={(val) => setyear(Number(val))}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose Year" />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5].map((year) => (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+          </div>
 
           <div>
             <Label>Select Semester</Label>
-            <Select value={semester} onValueChange={setSemester}>
+            <Select value={semester?.toString()||""} onValueChange={(val)=>setSemester(Number(val))}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Choose semester" />
               </SelectTrigger>
@@ -130,6 +205,18 @@ const Upload = () => {
               required
             />
           </div>
+          <div>
+            <Label htmlFor="examyear">Exam Year</Label>
+            <Input
+              id="examyear"
+              type="number" // lowercase "number"
+              value={examyear}
+              onChange={(e) => setExamyear(e.target.value)}
+              placeholder="2024, 2025 etc."
+              required
+            />
+          </div>
+
 
           <div>
             <Label>Subject</Label>
@@ -150,20 +237,20 @@ const Upload = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="notes">Notes</SelectItem>
-                <SelectItem value="papers">Papers</SelectItem>
+                <SelectItem value="paper">paper</SelectItem>
                 <SelectItem value="books">Books</SelectItem>
                 <SelectItem value="youtube">YouTube Link</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {(uploadType === "notes" || uploadType === "books" || uploadType === "papers") && (
+          {(uploadType === "notes" || uploadType === "books" || uploadType === "paper") && (
             <div>
               <Label>Upload File</Label>
               <Input
                 type="file"
-                accept={uploadType === "papers" ? "image/*" : "application/pdf"}
-                onChange={(e) => setFile(e.target.files[0])}
+                accept={uploadType === "paper" ? "image/*" : "application/pdf"}
+                onChange={(e) => setFile(e.target.files)}
               />
             </div>
           )}

@@ -16,11 +16,11 @@ import mainHero from "@/assets/hero-section-image2.jpg";
 
 import useFormStore from "@/store/useFormStore";
 import useRedirectStore from "@/store/useRedirectStore";
-import { useAuth } from "@clerk/clerk-react";
+// import { useAuth } from "@clerk/clerk-react";
 
 const Main = () => {
   const navigate = useNavigate();
-  const { getToken, isSignedIn } = useAuth();
+  // const { getToken, isSignedIn } = useAuth();
 
   const {
     course,
@@ -56,28 +56,29 @@ const Main = () => {
   }, [errorMessage, clearError]);
 
   // Send Clerk token to backend
-  useEffect(() => {
-    const sendToken = async () => {
-      if (!isSignedIn) return;
+  // useEffect(() => {
+  //   const sendToken = async () => {
+  //     if (!isSignedIn) return;
 
-      const token = await getToken();
-      try {
-        await fetch("http://localhost:5000/api/secure", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ message: "Token from frontend" }),
-        });
-      } catch (err) {
-        console.error("Failed to send token:", err);
-      }
-    };
+  //     const token = await getToken();
+  //     console.log("token",token);
+  //     try {
+  //       await fetch("http://localhost:5000/api/secure", {
+  //         method: "POST",
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //         credentials: "include",
+  //         body: JSON.stringify({ message: "Token from frontend" }),
+  //       });
+  //     } catch (err) {
+  //       console.error("Failed to send token:", err);
+  //     }
+  //   };
 
-    sendToken();
-  }, [getToken, isSignedIn]);
+  //   sendToken();
+  // }, [getToken, isSignedIn]);
 
   // Handle form submission
   const handleNext = () => {

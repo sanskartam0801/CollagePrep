@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -10,17 +9,17 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import AutoPlay from "embla-carousel-autoplay";
-import { SignInButton } from "@clerk/clerk-react";
 import heroImage from "@/assets/hero-section-image1.jpg";
 
-import gallery1 from '@/assets/gallery1.jpg'
-import gallery2 from '@/assets/gallery2.jpg'
-import gallery3 from '@/assets/gallery3.jpg'
-import gallery4 from '@/assets/gallery4.jpg'
-import gallery5 from '@/assets/gallery5.jpg'
-import gallery6 from '@/assets/gallery6.jpg'
+import gallery1 from '@/assets/gallery1.jpg';
+import gallery2 from '@/assets/gallery2.jpg';
+import gallery3 from '@/assets/gallery3.jpg';
+import gallery4 from '@/assets/gallery4.jpg';
+import gallery5 from '@/assets/gallery5.jpg';
+import gallery6 from '@/assets/gallery6.jpg';
+import { Link } from "react-router-dom";
 
-const galleryImages = [gallery1, gallery2, gallery3, gallery4, gallery5, gallery6]
+const galleryImages = [gallery1, gallery2, gallery3, gallery4, gallery5, gallery6];
 
 const Home = () => {
   return (
@@ -32,23 +31,14 @@ const Home = () => {
             Ace your college exams by accessing all the resources in one place.
           </h1>
           <p className="text-lg text-muted-foreground">
-            No more searching in different groups or websites. Everything is
-            structured for you.
+            No more searching in different groups or websites. Everything is structured for you.
           </p>
-          <SignInButton
-            mode="modal"
-            afterSignInUrl="/main"
-            afterSignUpUrl="/main"
-          >
-            <Button size="lg">Get Started</Button>
-          </SignInButton>
+          <Link  to ="/login"><Button size="lg">Get Started</Button>
+          </Link>
+
         </div>
         <div className="w-full md:w-1/2">
-          <img
-            src={heroImage}
-            alt="Hero Illustration"
-            className="w-full h-auto"
-          />
+          <img src={heroImage} alt="Hero Illustration" className="w-full h-auto" />
         </div>
       </section>
 
@@ -76,8 +66,7 @@ const Home = () => {
               <CardTitle>Step 3: Access Everything</CardTitle>
             </CardHeader>
             <CardContent>
-              Books, previous year papers, YouTube links—all in a structured
-              format.
+              Books, previous year papers, YouTube links—all in a structured format.
             </CardContent>
           </Card>
         </div>

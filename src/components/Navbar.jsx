@@ -3,26 +3,67 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Menu } from 'lucide-react'
-import { UserButton, SignInButton, useUser } from '@clerk/clerk-react'
+;
+import { useDispatch, useSelector } from 'react-redux';
+import Cookies from 'js-cookie';
+import { changeUserState } from '@/redux/slices/Authslice';
+import useApiHandler from '@/hooks/useapicall';
+// import { UserButton, SignInButton, useUser } from '@clerk/clerk-react'
 
 const Navbar = () => {
   const [open, setOpen] = useState(false)
-  const { isSignedIn } = useUser()
+  const dispatch= useDispatch();
+  const navigate= useNavigate();
+  const apicaller= useApiHandler();
+
+  const Handlelogout=  async()=>{
+
+    try{
+        const response= await apicaller("/api/auth/logout","POST");
+        console.log("responselogout",response);
+        if(response?.data?.success)
+        {
+             console.log("logout here");
+         localStorage.removeItem("token");
+
+        dispatch(changeUserState(false));
+            navigate("/");
+        }
+        
+    }
+    catch(e)
+    {
+      console.log("some error occured");
+
+    }
+   
+       
+
+    
+  }
+  
+  // const { isSignedIn } = useUser();
+  const isLoggedin= useSelector((state)=>state.auth.isLoggedIn)
+  const token= localStorage.getItem("token");
+  console.log("ll",isLoggedin);
+  
+
 
   // 🔄 1. Auto‑redirect: if someone is on '/' AND signs in, push them to '/main'
-  const navigate   = useNavigate()
+  
   const location   = useLocation()
-  useEffect(() => {
-    if (isSignedIn && location.pathname === '/') {
-      navigate('/main', { replace: true })
-    }
-  }, [isSignedIn, location.pathname, navigate])
+  // useEffect(() => {
+  //   if (isSignedIn && location.pathname === '/') {
+  //     navigate('/main', { replace: true })
+  //   }
+  // }, [isSignedIn, location.pathname, navigate])
 
   return (
     <nav className="w-full flex items-center justify-between px-6 py-4 shadow-md bg-white dark:bg-gray-900">
       {/* Logo — goes to Home if logged out, Main if logged in */}
       <Link
-        to={isSignedIn ? '/main' : '/'}
+        // to={isSignedIn ? '/main' : '/'}
+        to="/"
         className="text-2xl font-bold text-primary"
       >
         CollagePrep
@@ -39,15 +80,25 @@ const Navbar = () => {
         <Link to="/contact" className="text-sm font-medium hover:underline">
           Contact
         </Link>
+        {
+          !token ?(
+            <Link  to ="/login"><Button className="cursor-pointer" size="lg">Login</Button></Link>
+          ):(<Button className="cursor-pointer" onClick={Handlelogout}  size="lg">Logout</Button>)
+
+          
+
+        }
+        
+         
 
         {/* Login / profile */}
-        {isSignedIn ? (
-          <UserButton afterSignOutUrl="/" />
+        {/* {isSignedIn ? (
+          <UserButton aftersignoutrrl="/" />
         ) : (
           <SignInButton mode="modal" afterSignInUrl="/main">
             <Button>Login</Button>
           </SignInButton>
-        )}
+        )} */}
       </div>
 
       {/* Mobile hamburger */}
@@ -77,7 +128,7 @@ const Navbar = () => {
             </div>
 
             {/* Login / profile (bottom) */}
-            <div className="mt-auto pt-6 border-t">
+            {/* <div className="mt-auto pt-6 border-t">
               {isSignedIn ? (
                 <UserButton afterSignOutUrl="/" />
               ) : (
@@ -85,7 +136,7 @@ const Navbar = () => {
                   <Button className="w-full">Login</Button>
                 </SignInButton>
               )}
-            </div>
+            </div> */}
           </SheetContent>
         </Sheet>
       </div>
