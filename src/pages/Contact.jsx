@@ -53,7 +53,7 @@ const Contact = () => {
 
 
     // Simulated submission logic (replace with actual email-sending backend like EmailJS or custom API)
-    toast.success("✅ Your query has been sent successfully!");
+    // toast.success("✅ Your query has been sent successfully!");
 
     // Clear form
     setFullName("");
