@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import useApiHandler from "@/hooks/useapicall";
 
 const Contact = () => {
   const [fullName, setFullName] = useState("");
@@ -18,13 +19,38 @@ const Contact = () => {
   const [year, setYear] = useState("");
   const [department, setDepartment] = useState("");
   const [query, setQuery] = useState("");
+  const apicaller= useApiHandler();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     if (!fullName || !email || !year || !department || !query) {
       toast.error("⚠️ Please fill all the fields.");
       return;
     }
+    const payload= {
+      fullname:fullName,
+      email:email,
+      query:query,
+      year:year,
+      department:department
+    }
+
+    
+      const response= await apicaller("/api/auth/contact","POST",payload);
+      console.log("contactresponse",response);
+
+
+      
+
+
+    
+    
+
+
+
+
+
+
 
     // Simulated submission logic (replace with actual email-sending backend like EmailJS or custom API)
     toast.success("✅ Your query has been sent successfully!");
