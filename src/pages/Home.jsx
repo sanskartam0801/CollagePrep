@@ -22,6 +22,8 @@ import { Link } from "react-router-dom";
 const galleryImages = [gallery1, gallery2, gallery3, gallery4, gallery5, gallery6];
 
 const Home = () => {
+  const token = localStorage.getItem("token");
+
   return (
     <div className="pt-8 pb-24 space-y-24">
       {/* Hero Section */}
@@ -33,9 +35,17 @@ const Home = () => {
           <p className="text-lg text-muted-foreground">
             No more searching in different groups or websites. Everything is structured for you.
           </p>
-          <Link  to ="/login"><Button size="lg">Get Started</Button>
-          </Link>
 
+          {/* Conditional Button */}
+          {token == null ? (
+            <Link to="/login">
+              <Button size="lg">Get Started</Button>
+            </Link>
+          ) : (
+            <Link to="/main">
+              <Button size="lg">Get Started</Button>
+            </Link>
+          )}
         </div>
         <div className="w-full md:w-1/2">
           <img src={heroImage} alt="Hero Illustration" className="w-full h-auto" />
