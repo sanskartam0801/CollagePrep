@@ -40,7 +40,7 @@ const Navbar = () => {
        
 
     
-  }
+  };
   
   // const { isSignedIn } = useUser();
   const isLoggedin= useSelector((state)=>state.auth.isLoggedIn)

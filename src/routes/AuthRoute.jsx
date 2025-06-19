@@ -8,6 +8,8 @@ const AuthRoute = ({ element }) => {
 
 
   const token = localStorage.getItem("token");
+  // console.log("authrou",token);
+  
  
   
 
@@ -15,8 +17,8 @@ const AuthRoute = ({ element }) => {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
 
   // Redirect to /login if not logged in or token is missing
-  if ( !token) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
+  if ( token==null) {
+    return <Navigate to="/login" />;
   }
 
   // Authenticated: render the protected element
