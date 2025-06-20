@@ -4,6 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
 import {
   Select,
   SelectContent,
@@ -15,106 +16,152 @@ import useApiHandler from "@/hooks/useapicall";
 import { showErrorToast } from "@/utilities/toastutils";
 
 const Upload = () => {
-  const apicaller = useApiHandler();
-
   const [contributor, setContributor] = useState("");
   const [title, setTitle] = useState("");
   const [course, setCourse] = useState("");
   const [semester, setSemester] = useState();
   const [branch, setBranch] = useState("");
   const [subject, setSubject] = useState("");
-  const [year, setYear] = useState();
+  const [uploadType, setUploadType] = useState("");
+  const [file, setFile] = useState(null);
+  const [year, setyear] = useState();
+  const [youtubeLink, setYoutubeLink] = useState("");
   const [examyear, setExamyear] = useState();
+  const apicaller = useApiHandler();
 
-  const [notesFiles, setNotesFiles] = useState([]);
-  const [paperImages, setPaperImages] = useState([]);
-  const [booksFiles, setBooksFiles] = useState([]);
-  const [youtubeLinks, setYoutubeLinks] = useState([""]);
 
-  const handleFileChange = (setter) => (e) => {
-    setter([...e.target.files]);
-  };
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm();
 
-  const handleYoutubeChange = (index, value) => {
-    const updated = [...youtubeLinks];
-    updated[index] = value;
-    setYoutubeLinks(updated);
-  };
+  console.log(file)
 
-  const addYoutubeField = () => setYoutubeLinks([...youtubeLinks, ""]);
-
-  const handleSubmit = async (e) => {
+  const handleSubmitform = async (e) => {
     e.preventDefault();
 
-    if (!title || !course || !semester || !branch || !subject || !year || !examyear) {
+    if (!title || !course || !semester || !branch || !subject || !uploadType) {
       toast.error("⚠️ Please fill all required fields.");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("contributor", contributor);
-    formData.append("course", course);
-    formData.append("semester", semester);
-    formData.append("department", branch);
-    formData.append("subject", subject);
-    formData.append("year", year);
-    formData.append("examyear", examyear);
-
-    notesFiles.forEach((file) => formData.append("notes", file));
-    paperImages.forEach((file) => formData.append("papers", file));
-    booksFiles.forEach((file) => formData.append("books", file));
-    youtubeLinks
-      .filter((link) => link.trim() !== "")
-      .forEach((link) => formData.append("youtubeLinks", link));
-
-    try {
-      const response = await apicaller("/api/auth/upload", "POST", formData);
-      if (!response.data.success) {
-        showErrorToast("File Already exists or failed to upload.");
-      } else {
-        toast.success("✅ Upload successful!");
-        setContributor("");
-        setTitle("");
-        setCourse("");
-        setSemester("");
-        setBranch("");
-        setSubject("");
-        setYear("");
-        setExamyear("");
-        setNotesFiles([]);
-        setPaperImages([]);
-        setBooksFiles([]);
-        setYoutubeLinks([""]);
-      }
-    } catch (e) {
-      console.error(e);
-      toast.error(e?.response?.data?.message || "Something went wrong.");
+    if (
+      (uploadType === "notes" || uploadType === "books" || uploadType === "papers") &&
+      !file
+    ) {
+      toast.error("⚠️ Please upload the required file.");
+      return;
     }
+
+    if (uploadType === "youtube" && !youtubeLink) {
+      toast.error("⚠️ Please provide the YouTube link.");
+      return;
+    }
+
+    // const payload = {
+    //   title,
+    //   type: uploadType,
+    //   year,
+    //   semester,
+    //   subject,
+    //   department: branch,
+    //   examyear,
+    //   ...(uploadType === "youtube"
+    //     ? { youtubeLinks: youtubeLink }
+    //     : { files: file[0] }),
+    // };
+    // console.log("payload", payload);
+
+
+    const formData = new FormData();
+formData.append("title", title);
+formData.append("type", uploadType);
+formData.append("year", year);
+formData.append("semester", semester);
+formData.append("subject", subject);
+formData.append("department", branch);
+formData.append("examyear", examyear);
+
+console.log("files",formData);
+
+if (uploadType === "youtube") {
+  formData.append("youtubeLinks", youtubeLink);
+} else {
+  if (file?.length > 0) {
+    // Append as array item (even if single) to match multer.array("files")
+    formData.append("files", file[0]);
+  }
+}
+
+   
+      const response = await apicaller("/api/auth/upload", "POST", formData);
+      console.log("heyy");
+      
+     
+      
+   
+
+
+
+
+    // toast.success("✅ Files uploaded successfully. Thank you for your contribution!");
+
+    // Clear form
+    // setContributor("");
+    // setTitle("");
+    // setCourse("");
+    // setSemester("");
+    // setBranch("");
+    // setSubject("");
+    // setUploadType("");
+    // setFile(null);
+    // setYoutubeLink("");
   };
 
   return (
-    <div className="pt-10 pb-24 space-y-24">
+    <div className="pt-8 pb-20 space-y-24">
       <ToastContainer />
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col md:flex-row gap-10">
-        <form onSubmit={handleSubmit} className="w-full md:w-1/2 space-y-6">
-          <h2 className="text-3xl font-bold mb-4">Contribute Study Materials</h2>
 
-          <div>
-            <Label>Contributor Name (optional)</Label>
-            <Input value={contributor} onChange={(e) => setContributor(e.target.value)} />
+      {/* Hero Section */}
+      <section className="px-6 max-w-7xl mx-auto flex flex-col md:flex-row items-start gap-10 min-h-[80vh]">
+        <form
+          onSubmit={handleSubmitform}
+          className="w-full md:w-1/2 space-y-5"
+        >
+          <h2 className="text-3xl font-bold mb-4">Contribute Your Study Material</h2>
+
+          <div className="hover:border-teal-700">
+            <Label>Full Name of Contributor</Label>
+            <Input
+              type="text"
+              value={contributor}
+              onChange={(e) => setContributor(e.target.value)}
+            
+              placeholder="Enter your name (optional)"
+            />
+           
           </div>
 
-          <div>
-            <Label>Material Title</Label>
-            <Input required value={title} onChange={(e) => setTitle(e.target.value)} />
+          <div className="hover:border-teal-700">
+            <Label>Title</Label>
+            <Input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter material title"
+              required
+            />
           </div>
 
-          <div>
-            <Label>Course</Label>
+          <div className="hover:border-teal-700">
+            <Label>Select Course</Label>
             <Select value={course} onValueChange={setCourse}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Course" />
+                <SelectValue placeholder="Choose course" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="btech">B.Tech</SelectItem>
@@ -123,73 +170,121 @@ const Upload = () => {
               </SelectContent>
             </Select>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label>Year</Label>
-              <Select value={year?.toString()} onValueChange={(val) => setYear(Number(val))}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5].map((yr) => (
-                    <SelectItem key={yr} value={yr.toString()}>{yr}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="flex flex-row gap-5 ">
+            <div className="w-[50%] hover:border-teal-700">
+            <Label>Select Year</Label>
+            <Select value={year?.toString() || ""} onValueChange={(val) => setyear(Number(val))}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose Year" />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5].map((year) => (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             </div>
-            <div>
-              <Label>Semester</Label>
-              <Select value={semester?.toString()} onValueChange={(val) => setSemester(Number(val))}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Semester" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-                    <SelectItem key={sem} value={sem.toString()}>{sem}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
+             <div className="w-[50%] hover:border-teal-700">
+            <Label>Select Semester</Label>
+            <Select value={semester?.toString()||""} onValueChange={(val)=>setSemester(Number(val))}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose semester" />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
+                  <SelectItem key={sem} value={sem.toString()}>
+                    {sem}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <Input required value={branch} onChange={(e) => setBranch(e.target.value)} placeholder="Branch" />
-          <Input required value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Subject" />
-          <Input required value={examyear} onChange={(e) => setExamyear(e.target.value)} placeholder="Exam Year (e.g., 2025)" type="number" />
 
-          <div className="space-y-2">
-            <Label>Upload Notes (PDF)</Label>
-            <Input type="file" accept="application/pdf" multiple onChange={handleFileChange(setNotesFiles)} />
           </div>
 
-          <div className="space-y-2">
-            <Label>Upload Papers (Images)</Label>
-            <Input type="file" accept="image/*" multiple onChange={handleFileChange(setPaperImages)} />
+         <div className="flex flex-row gap-5">
+                   <div className="w-[50%] hover:border-teal-700">
+            <Label>Branch</Label>
+            <Input
+              type="text"
+              value={branch}
+              onChange={(e) => setBranch(e.target.value)}
+              placeholder="Enter branch name ECE,CSE, etc"
+              required
+              
+              
+            />
+          </div>
+          <div className="w-[50%] hover:border-teal-700">
+            <Label htmlFor="examyear">Exam Year</Label>
+            <Input
+              id="examyear"
+              type="number" // lowercase "number"
+              value={examyear}
+              onChange={(e) => setExamyear(e.target.value)}
+              placeholder="2024, 2025 etc."
+              required
+            />
+          </div>
+         </div>
+         
+
+
+          <div className="hover:border-teal-700">
+            <Label>Subject</Label>
+            <Input
+              type="text"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="Enter subject name"
+              required
+            />
           </div>
 
-          <div className="space-y-2">
-            <Label>Upload Books (PDF)</Label>
-            <Input type="file" accept="application/pdf" multiple onChange={handleFileChange(setBooksFiles)} />
+          <div className="hover:border-teal-700">
+            <Label>What are you uploading?</Label>
+            <Select value={uploadType} onValueChange={setUploadType}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="notes">Notes</SelectItem>
+                <SelectItem value="papers">paper</SelectItem>
+                <SelectItem value="books">Books</SelectItem>
+                <SelectItem value="youtube">YouTube Link</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label>YouTube Links</Label>
-            {youtubeLinks.map((link, idx) => (
+          {(uploadType === "notes" || uploadType === "books" || uploadType === "papers") && (
+            <div className="hover:border-teal-700">
+              <Label>Upload File</Label>
               <Input
-                key={idx}
-                type="url"
-                placeholder={`YouTube Link ${idx + 1}`}
-                value={link}
-                onChange={(e) => handleYoutubeChange(idx, e.target.value)}
+                type="file"
+                accept={uploadType === "paper" ? "image/*" : "application/pdf"}
+                onChange={(e) => setFile(e.target.files)}
               />
-            ))}
-            <Button type="button" variant="outline" onClick={addYoutubeField}>
-              + Add Another YouTube Link
-            </Button>
-          </div>
+            </div>
+          )}
 
-          <Button type="submit" className="w-full mt-6">
-            Upload All
+          {uploadType === "youtube" && (
+            <div className="hover:border-teal-700">
+              <Label>YouTube Link</Label>
+              <Input
+                type="url"
+                placeholder="Enter YouTube URL"
+                value={youtubeLink}
+                onChange={(e) => setYoutubeLink(e.target.value)}
+              />
+            </div>
+          )}
+
+          <Button type="submit" className="w-full mt-4">
+            Submit
           </Button>
         </form>
 
@@ -202,40 +297,32 @@ const Upload = () => {
         </div>
       </section>
 
-      {/* 💡 Why Contribute Section */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Additional Sections */}
+      <section className="px-6 max-w-7xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-10">Why Contribute?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            {
-              title: "Help Others",
-              desc: "Your notes or links might help someone pass a tough exam or understand a hard topic.",
-            },
-            {
-              title: "Be Recognized",
-              desc: "Get credited for your contributions — or upload anonymously if you prefer.",
-            },
-            {
-              title: "Grow the Community",
-              desc: "CollegePrep is built for students by students. Every upload strengthens us.",
-            },
-          ].map((item, idx) => (
-            <div key={idx} className="bg-gray-50 border rounded-xl p-6 shadow-sm">
-              <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-              <p className="text-gray-600">{item.desc}</p>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-muted p-6 rounded-xl shadow-md">
+            <h3 className="text-xl font-semibold mb-2">Help Others</h3>
+            <p>Your notes or links might help someone pass a tough exam or understand a hard topic.</p>
+          </div>
+          <div className="bg-muted p-6 rounded-xl shadow-md">
+            <h3 className="text-xl font-semibold mb-2">Be Recognized</h3>
+            <p>Get credited for your contributions — optional name fields allow anonymous uploads too.</p>
+          </div>
+          <div className="bg-muted p-6 rounded-xl shadow-md">
+            <h3 className="text-xl font-semibold mb-2">Grow the Community</h3>
+            <p>CollagePrep is built for students by students. Every upload makes the platform stronger.</p>
+          </div>
         </div>
       </section>
 
-      {/* ❓ Contact Section */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center">
+      <section className="px-6 max-w-5xl mx-auto text-center">
         <h2 className="text-3xl font-bold mt-16 mb-6">Have a Question?</h2>
         <p className="text-lg mb-4">
-          Reach out to us on the <strong>Contact</strong> page or email us at{" "}
-          <strong>support@collegeprep.com</strong>.
+          Reach out to us on our <span className="font-semibold">Contact</span> page or email us at
+          <span className="font-semibold"> support@collageprep.com</span>.
         </p>
-        <p className="text-muted-foreground">We're always happy to help!</p>
+        <p className="text-muted-foreground">We're always happy to help you!</p>
       </section>
     </div>
   );

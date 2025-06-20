@@ -23,6 +23,8 @@ const galleryImages = [gallery1, gallery2, gallery3, gallery4, gallery5, gallery
 
 const Home = () => {
   const token = localStorage.getItem("token");
+  console.log("yoken in home",token);
+  
 
   return (
     <div className="pt-8 pb-24 space-y-24">
@@ -37,13 +39,13 @@ const Home = () => {
           </p>
 
           {/* Conditional Button */}
-          {token == null ? (
+          {!token ? (
             <Link to="/login">
               <Button size="lg">Get Started</Button>
             </Link>
           ) : (
             <Link to="/main">
-              <Button size="lg">Get Started</Button>
+              <Button size="lg">Go to MainPage</Button>
             </Link>
           )}
         </div>

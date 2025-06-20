@@ -49,9 +49,11 @@ const useApiHandler = () => {
       showErrorToast(errorMessage);
       console.error("API Error:", errorMessage, error);
     }
+    
+ 
   }
+   return apiCall;
 
-  return apiCall;
 };
 
 export default useApiHandler;

@@ -13,10 +13,11 @@ import Upload from './pages/Upload';
 import Contact from './pages/Contact';
 
 import AuthRoute from '@/routes/AuthRoute';
-import FormProtectedRoute from '@/routes/FormProtectedRoute';
+// import FormProtectedRoute from '@/routes/FormProtectedRoute';
 
 import RedirectMessageListener from '@/components/RedirectMessageListener'; // <- import it here
 import LoginSignupPage from './pages/LoginSignupPage';
+import FormProtectedRoute from './routes/FormProtectedRoute';
 
 const App = () => {
   return (
@@ -25,8 +26,8 @@ const App = () => {
       <div className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/main" element={<AuthRoute element={<Main></Main>} />} />
-          <Route path="/reading" element={<AuthRoute element={<Reading />} />} />
+          <Route path="/main"   element={<AuthRoute element={<Main />} />} />
+          <Route path="/reading" element={<FormProtectedRoute element={<Reading />} />} />
           <Route path="/upload" element={<AuthRoute element={<Upload />} />} />
           <Route path="/contact" element={<AuthRoute element={<Contact />} />} />
            <Route path="/login" element={<LoginSignupPage></LoginSignupPage>} />

@@ -19,15 +19,19 @@ import useRedirectStore from "@/store/useRedirectStore";
 // import { useAuth } from "@clerk/clerk-react";
 
 const Main = () => {
+  const resetform= useFormStore((state)=>state.resetForm)
   const navigate = useNavigate();
   // const { getToken, isSignedIn } = useAuth();
+  useEffect(() => {
+  resetform();
+}, []);
 
   const {
-    course,
+    year,
     semester,
     branch,
     subject,
-    setCourse,
+    setYear,
     setSemester,
     setBranch,
     setSubject,
@@ -55,72 +59,63 @@ const Main = () => {
     }
   }, [errorMessage, clearError]);
 
-  // Send Clerk token to backend
-  // useEffect(() => {
-  //   const sendToken = async () => {
-  //     if (!isSignedIn) return;
+ 
 
-  //     const token = await getToken();
-  //     console.log("token",token);
-  //     try {
-  //       await fetch("http://localhost:5000/api/secure", {
-  //         method: "POST",
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "Content-Type": "application/json",
-  //         },
-  //         credentials: "include",
-  //         body: JSON.stringify({ message: "Token from frontend" }),
-  //       });
-  //     } catch (err) {
-  //       console.error("Failed to send token:", err);
-  //     }
-  //   };
-
-  //   sendToken();
-  // }, [getToken, isSignedIn]);
-
+ 
   // Handle form submission
   const handleNext = () => {
     setSubmitted(true);
 
-    if (!course || !semester || !branch.trim() || !subject.trim()) {
+    if (!year || !semester || !branch.trim() || !subject.trim()) {
       toast.error("⚠️ All fields are required to proceed.");
       return;
     }
 
     setFormFilled(true);
+   
     toast.success("✅ Form submitted successfully!");
 
     setTimeout(() => {
       navigate("/reading");
-      setCourse("");
-      setSemester("");
-      setBranch("");
-      setSubject("");
+     
     }, 500);
   };
 
   return (
     <div className="pt-8 pb-24 space-y-24">
+
+
       {/* Hero Section with Form */}
       <section className="flex flex-col md:flex-row items-center justify-between gap-10 px-6 max-w-7xl mx-auto min-h-[80vh]">
         <div className="w-full md:w-1/2 space-y-6">
           <h2 className="text-3xl font-bold">Get Started with Resources</h2>
           <div className="space-y-4">
-            <div>
-              <Label>Select Course</Label>
-              <Select value={course} onValueChange={setCourse}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Choose course" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="btech">B.Tech</SelectItem>
-                  <SelectItem value="barch">B.Arch</SelectItem>
-                  <SelectItem value="mca">MCA</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+           <div>
+  <Label htmlFor="year">Select Year</Label>
+  <Select
+    value={year ? String(year) : ""}
+    onValueChange={(val) => {
+      setYear(parseInt(val));
+      clearError?.("year");
+    }}
+  >
+    <SelectTrigger id="year" className="w-full">
+      <SelectValue placeholder="Choose Year" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="1">1st Year</SelectItem>
+      <SelectItem value="2">2nd Year</SelectItem>
+      <SelectItem value="3">3rd Year</SelectItem>
+      <SelectItem value="4">4th Year</SelectItem>
+    </SelectContent>
+  </Select>
+  {errorMessage?.year && (
+    <p className="text-sm text-red-500 mt-1">{errorMessage.year}</p>
+  )}
+</div>
+
+
+
             <div>
               <Label>Select Semester</Label>
               <Select value={semester} onValueChange={setSemester}>
@@ -214,6 +209,7 @@ const Main = () => {
           </div>
         </div>
       </section>
+
     </div>
   );
 };

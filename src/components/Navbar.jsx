@@ -71,17 +71,17 @@ const Navbar = () => {
 
       {/* Desktop menu */}
       <div className="hidden md:flex items-center gap-6">
-        <Link to="/reading" className="text-sm font-medium hover:underline">
+        <Link to="/reading" className="text-lg font-medium hover:underline">
           Read
         </Link>
-        <Link to="/upload" className="text-sm font-medium hover:underline">
+        <Link to="/upload" className="text-lg font-medium hover:underline">
           Upload
         </Link>
-        <Link to="/contact" className="text-sm font-medium hover:underline">
-          Contact
+        <Link to="/contact" className="text-lg font-medium hover:underline ">
+          Contact Us
         </Link>
         {
-          !token ?(
+          token==null ?(
             <Link  to ="/login"><Button className="cursor-pointer" size="lg">Login</Button></Link>
           ):(<Button className="cursor-pointer" onClick={Handlelogout}  size="lg">Logout</Button>)
 

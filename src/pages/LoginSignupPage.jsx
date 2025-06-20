@@ -36,8 +36,11 @@ const LoginSignupPage = () => {
 
     try {
       const response = await apicaller(url, "POST", payload);
-     
+        console.log("res",response);
+        
         const token = response?.data?.token;
+        console.log("token",token);
+        
         localStorage.setItem("token", token);
         
         dispatch(changeUserState(true));

@@ -2,14 +2,17 @@ import React, { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 // import { useAuth } from "@clerk/clerk-react";
 import useFormStore from "@/store/useFormStore";
-import useRedirectStore from "@/store/useRedirectStore";
+// import useRedirectStore from "@/store/useRedirectStore";
 import Loader from "@/components/Loader";
+import { showErrorToast } from "@/utilities/toastutils";
 
 const FormProtectedRoute = ({ element }) => {
   // const { isSignedIn, isLoaded } = useAuth();
   const formFilled = useFormStore((state) => state.formFilled);
+  console.log("formFilled",formFilled);
+  
   const location = useLocation();
-  const setMessage = useRedirectStore((state) => state.setMessage);
+  // const setMessage = useRedirectStore((state) => state.setMessage);
 
   // useEffect(() => {
   //   if (isLoaded) {
@@ -32,7 +35,8 @@ const FormProtectedRoute = ({ element }) => {
   // }
 
   if (!formFilled) {
-    return <Navigate to="/main" replace state={{ from: location }} />;
+    showErrorToast("You Need to fill Form to access Read Page")
+    return <Navigate to="/main"  />;
   }
 
   return element;

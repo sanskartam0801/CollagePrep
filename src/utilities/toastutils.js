@@ -9,7 +9,7 @@ const baseToastStyle = {
   textAlign: "center",
   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
   width: "300px",
-  marginTop:"50px",
+ 
 };
 
 // Individual styles
@@ -34,7 +34,7 @@ export const customPromiseStyles = {
 // Show success toast
 export const showSuccessToast = (message, options = {}, dismiss = false) => {
   const toastId = toast.success(message, {
-    duration: 3000,
+    duration: 2000,
     position: "top-right",
     style: customPromiseStyles.success,
     ...options,
@@ -66,7 +66,7 @@ export const showErrorToast = (message, options = {}, dismiss = false) => {
 // Show loading toast
 export const showLoadingToast = (message, options = {}, dismiss = false) => {
   const toastId = toast.loading(message, {
-    duration: 4000,
+    duration: 2000,
     position: "top-right",
     style: customPromiseStyles.loading,
     ...options,
