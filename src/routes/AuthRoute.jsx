@@ -8,6 +8,7 @@ import { showErrorToast } from "@/utilities/toastutils";
 const AuthRoute = ({ element }) => {
   const location = useLocation();
 
+ 
 
   const token = localStorage.getItem("token");
   // console.log("authrou",token);
@@ -16,15 +17,16 @@ const AuthRoute = ({ element }) => {
   
 
 
-  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+ 
 
   // Redirect to /login if not logged in or token is missing
-  if ( !token) {
-    showErrorToast("You Have to Login First");
+  if ( !token ) {
+    showErrorToast("Login Please to access");
     return <LoginSignupPage></LoginSignupPage>;
   }
 
   // Authenticated: render the protected element
+  else
   return element;
 };
 

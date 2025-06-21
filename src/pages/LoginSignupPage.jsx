@@ -10,7 +10,8 @@ import { useDispatch } from "react-redux";
 import { changeUserState } from "@/redux/slices/Authslice";
 import { useNavigate } from "react-router-dom";
 import { showErrorToast } from "@/utilities/toastutils";
-import { Eye, EyeOff } from "lucide-react";
+import { Cookie, Eye, EyeOff } from "lucide-react";
+import { toast } from "react-toastify";
 
 const LoginSignupPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -48,11 +49,22 @@ const LoginSignupPage = () => {
 
       const token = response?.data?.token;
       console.log("token", token);
-
-      localStorage.setItem("token", token);
+      if(response?.data?.success)
+      {
+        localStorage.setItem("token", token);
+      Cookies.set("fullname", response?.data?.student?.firstname);
+      console.log("fullname",Cookies.get("fullname"));
+       
+      
 
       dispatch(changeUserState(true));
+      
       navigate("/main");
+
+      }
+      
+
+      
     } catch (e) {
       showErrorToast(e.message || "Something went wrong");
     }

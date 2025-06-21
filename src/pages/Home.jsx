@@ -22,10 +22,7 @@ import { Link } from "react-router-dom";
 const galleryImages = [gallery1, gallery2, gallery3, gallery4, gallery5, gallery6];
 
 const Home = () => {
-  const token = localStorage.getItem("token");
-  console.log("yoken in home",token);
-  
-
+  const token= localStorage.getItem("token");
   return (
     <div className="pt-8 pb-24 space-y-24">
       {/* Hero Section */}
@@ -37,6 +34,8 @@ const Home = () => {
           <p className="text-lg text-muted-foreground">
             No more searching in different groups or websites. Everything is structured for you.
           </p>
+        
+         
 
           {/* Conditional Button */}
           {!token ? (

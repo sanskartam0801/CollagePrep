@@ -239,7 +239,7 @@ if (uploadType === "youtube") {
             <Input
               type="text"
               value={subject}
-              onChange={(e) => setSubject(e.target.value)}
+              onChange={(e) => setSubject(e.target.value.toLowerCase().trim())}
               placeholder="Enter subject name"
               required
             />
