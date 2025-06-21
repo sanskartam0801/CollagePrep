@@ -4,6 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
 import {
   Select,
   SelectContent,
@@ -28,9 +29,19 @@ const Upload = () => {
   const [examyear, setExamyear] = useState();
   const apicaller = useApiHandler();
 
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm();
+
   console.log(file)
 
-  const handleSubmit = async (e) => {
+  const handleSubmitform = async (e) => {
     e.preventDefault();
 
     if (!title || !course || !semester || !branch || !subject || !uploadType) {
@@ -75,6 +86,8 @@ formData.append("subject", subject);
 formData.append("department", branch);
 formData.append("examyear", examyear);
 
+console.log("files",formData);
+
 if (uploadType === "youtube") {
   formData.append("youtubeLinks", youtubeLink);
 } else {
@@ -84,20 +97,13 @@ if (uploadType === "youtube") {
   }
 }
 
-    try {
+   
       const response = await apicaller("/api/auth/upload", "POST", formData);
       console.log("heyy");
       
-      if(!response.data.success)
-      {
-        showErrorToast("File Already exist")
-      }
+     
       
-    } catch (e) {
-      console.error(e);
-      toast.error(e?.response?.data?.message);
-    }
-
+   
 
 
 
@@ -123,22 +129,24 @@ if (uploadType === "youtube") {
       {/* Hero Section */}
       <section className="px-6 max-w-7xl mx-auto flex flex-col md:flex-row items-start gap-10 min-h-[80vh]">
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmitform}
           className="w-full md:w-1/2 space-y-5"
         >
           <h2 className="text-3xl font-bold mb-4">Contribute Your Study Material</h2>
 
-          <div>
+          <div className="hover:border-teal-700">
             <Label>Full Name of Contributor</Label>
             <Input
               type="text"
               value={contributor}
               onChange={(e) => setContributor(e.target.value)}
+            
               placeholder="Enter your name (optional)"
             />
+           
           </div>
 
-          <div>
+          <div className="hover:border-teal-700">
             <Label>Title</Label>
             <Input
               type="text"
@@ -149,7 +157,7 @@ if (uploadType === "youtube") {
             />
           </div>
 
-          <div>
+          <div className="hover:border-teal-700">
             <Label>Select Course</Label>
             <Select value={course} onValueChange={setCourse}>
               <SelectTrigger className="w-full">
@@ -162,7 +170,8 @@ if (uploadType === "youtube") {
               </SelectContent>
             </Select>
           </div>
-          <div>
+          <div className="flex flex-row gap-5 ">
+            <div className="w-[50%] hover:border-teal-700">
             <Label>Select Year</Label>
             <Select value={year?.toString() || ""} onValueChange={(val) => setyear(Number(val))}>
               <SelectTrigger className="w-full">
@@ -176,10 +185,9 @@ if (uploadType === "youtube") {
                 ))}
               </SelectContent>
             </Select>
+            </div>
 
-          </div>
-
-          <div>
+             <div className="w-[50%] hover:border-teal-700">
             <Label>Select Semester</Label>
             <Select value={semester?.toString()||""} onValueChange={(val)=>setSemester(Number(val))}>
               <SelectTrigger className="w-full">
@@ -195,17 +203,23 @@ if (uploadType === "youtube") {
             </Select>
           </div>
 
-          <div>
+
+          </div>
+
+         <div className="flex flex-row gap-5">
+                   <div className="w-[50%] hover:border-teal-700">
             <Label>Branch</Label>
             <Input
               type="text"
               value={branch}
               onChange={(e) => setBranch(e.target.value)}
-              placeholder="Enter branch name"
+              placeholder="Enter branch name ECE,CSE, etc"
               required
+              
+              
             />
           </div>
-          <div>
+          <div className="w-[50%] hover:border-teal-700">
             <Label htmlFor="examyear">Exam Year</Label>
             <Input
               id="examyear"
@@ -216,20 +230,22 @@ if (uploadType === "youtube") {
               required
             />
           </div>
+         </div>
+         
 
 
-          <div>
+          <div className="hover:border-teal-700">
             <Label>Subject</Label>
             <Input
               type="text"
               value={subject}
-              onChange={(e) => setSubject(e.target.value)}
+              onChange={(e) => setSubject(e.target.value.toLowerCase().trim())}
               placeholder="Enter subject name"
               required
             />
           </div>
 
-          <div>
+          <div className="hover:border-teal-700">
             <Label>What are you uploading?</Label>
             <Select value={uploadType} onValueChange={setUploadType}>
               <SelectTrigger className="w-full">
@@ -237,15 +253,15 @@ if (uploadType === "youtube") {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="notes">Notes</SelectItem>
-                <SelectItem value="paper">paper</SelectItem>
+                <SelectItem value="papers">paper</SelectItem>
                 <SelectItem value="books">Books</SelectItem>
                 <SelectItem value="youtube">YouTube Link</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {(uploadType === "notes" || uploadType === "books" || uploadType === "paper") && (
-            <div>
+          {(uploadType === "notes" || uploadType === "books" || uploadType === "papers") && (
+            <div className="hover:border-teal-700">
               <Label>Upload File</Label>
               <Input
                 type="file"
@@ -256,7 +272,7 @@ if (uploadType === "youtube") {
           )}
 
           {uploadType === "youtube" && (
-            <div>
+            <div className="hover:border-teal-700">
               <Label>YouTube Link</Label>
               <Input
                 type="url"

@@ -5,7 +5,8 @@ import Cookies from "js-cookie";
 
 const initialState = {
   isLoggedIn: !!Cookies.get("token") ,
-  justLoggedOut: false, // true if token exists, false otherwise
+  justLoggedOut: false,
+  studentname:"" // true if token exists, false otherwise
 };
 
 const authSlice = createSlice({
@@ -21,6 +22,9 @@ const authSlice = createSlice({
     },
      clearLogoutFlag: (state) => {
       state.justLoggedOut = false;
+    },
+    studentfullname:(state)=>{
+      state.studentname= action.payload
     }
 
   }

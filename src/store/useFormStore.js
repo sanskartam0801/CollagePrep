@@ -1,20 +1,40 @@
-import { create } from 'zustand';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-const useFormStore = create((set) => ({
-  course: '',
-  semester: '',
-  branch: '',
-  subject: '',
-  formFilled: false,
-  errorMessage: '',
+const useFormStore = create(
+  persist(
+    (set) => ({
+      year: "",
+      semester: "",
+      branch: "",
+      subject: "",
+      formFilled: false,
+      errorMessage: null,
 
-  setCourse: (course) => set({ course }),
-  setSemester: (semester) => set({ semester }),
-  setBranch: (branch) => set({ branch }),
-  setSubject: (subject) => set({ subject }),
-  setFormFilled: (formFilled) => set({ formFilled }),
-  setError: (errorMessage) => set({ errorMessage }),
-  clearError: () => set({ errorMessage: '' }),
-}));
+      setYear: (year) => set({ year }),
+      setSemester: (semester) => set({ semester }),
+      setBranch: (branch) => set({ branch }),
+      setSubject: (subject) => set({ subject }),
+      setFormFilled: (status) => set({ formFilled: status }),
+      setError: (message) => set({ errorMessage: message }),
+      clearError: () => set({ errorMessage: null }),
+
+
+      resetForm: () =>
+        set({
+          year: "",
+          semester: "",
+          branch: "",
+          subject: "",
+          formFilled:false
+          
+        }),
+  
+    }),
+    {
+      name: "form-storage", // localStorage key
+    }
+  )
+);
 
 export default useFormStore;

@@ -21,14 +21,14 @@ export const axiosInstance = axios.create({
 
 
 
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.log("ERROR", error);
-    if (error.response?.status === 401) {
-      store.dispatch(changeUserState(false)); // IN REDUX UNDER store.js REDUCERS of authSlice and in authSlice.js ALL REDUCERS ARE WRITTEN
-      window.location.href = "/login";
-    }
-    return Promise.reject(error);
-  }
-);
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     console.log("ERROR", error);
+//     if (error.response?.status === 401) {
+//       store.dispatch(changeUserState(false)); // IN REDUX UNDER store.js REDUCERS of authSlice and in authSlice.js ALL REDUCERS ARE WRITTEN
+//       window.location.href = "/login";
+//     }
+//     return Promise.reject(error);
+//   }
+// );

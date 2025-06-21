@@ -41,6 +41,16 @@ const Home = () => {
           }
          
 
+          {/* Conditional Button */}
+          {!token ? (
+            <Link to="/login">
+              <Button size="lg">Get Started</Button>
+            </Link>
+          ) : (
+            <Link to="/main">
+              <Button size="lg">Go to MainPage</Button>
+            </Link>
+          )}
         </div>
         <div className="w-full md:w-1/2">
           <img src={heroImage} alt="Hero Illustration" className="w-full h-auto" />
