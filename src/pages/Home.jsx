@@ -34,11 +34,7 @@ const Home = () => {
           <p className="text-lg text-muted-foreground">
             No more searching in different groups or websites. Everything is structured for you.
           </p>
-          {
-            token==null?( <Link  to ="/login"><Button size="lg">Get Started</Button>
-          </Link>):(<Link  to ="/main"><Button size="lg">Get Started</Button>
-          </Link>)
-          }
+        
          
 
           {/* Conditional Button */}
