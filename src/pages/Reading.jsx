@@ -47,9 +47,10 @@ const Reading = () => {
   const getalldata = async () => {
     try {
       console.log("Calling API with:", { semester, year, branch, subject });
+      const branchtolowercase= branch.toLowerCase().trim;
 
       const response = await apicaller(
-        `/api/auth/getsubjectdetails?semester=${semester}&year=${year}&department=${branch}&subjects=${subject}`,
+        `/api/auth/getsubjectdetails?semester=${semester}&year=${year}&department=${branchtolowercase}&subjects=${subject}`,
         "GET"
       );
       console.log("response",response);

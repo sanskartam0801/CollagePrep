@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Menu } from 'lucide-react'
+import { Cookie, Menu } from 'lucide-react'
 ;
 import { useDispatch, useSelector } from 'react-redux';
 import Cookies from 'js-cookie';
@@ -15,6 +15,21 @@ const Navbar = () => {
   const dispatch= useDispatch();
   const navigate= useNavigate();
   const apicaller= useApiHandler();
+ const fullname= Cookies.get("fullname")
+ console.log("navbarfull",fullname);
+
+//  windows screen size for span
+ const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsLargeScreen(window.innerWidth >= 1024);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+ 
+  
+  
+  
 
   const Handlelogout=  async()=>{
 
@@ -45,6 +60,8 @@ const Navbar = () => {
   // const { isSignedIn } = useUser();
   const isLoggedin= useSelector((state)=>state.auth.isLoggedIn)
   const token= localStorage.getItem("token");
+  console.log("navbartoken",token);
+  
   console.log("ll",isLoggedin);
   
 
@@ -61,6 +78,7 @@ const Navbar = () => {
   return (
     <nav className="w-full flex items-center justify-between px-6 py-4 shadow-md bg-white dark:bg-gray-900">
       {/* Logo — goes to Home if logged out, Main if logged in */}
+      
       <Link
         // to={isSignedIn ? '/main' : '/'}
         to="/"
@@ -69,9 +87,17 @@ const Navbar = () => {
         CollagePrep
       </Link>
 
+        <span className="text-base font-semibold">
+      {isLargeScreen && token 
+        ? `Hey! ${fullname} You’re just one step away from mastering your semester`
+        : ""}
+    </span>
+      
+
+
       {/* Desktop menu */}
       <div className="hidden md:flex items-center gap-6">
-        <Link to="/reading" className="text-lg font-medium hover:underline">
+        <Link to="/main" className="text-lg font-medium hover:underline">
           Read
         </Link>
         <Link to="/upload" className="text-lg font-medium hover:underline">
