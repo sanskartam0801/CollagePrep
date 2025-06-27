@@ -42,7 +42,7 @@ const Navbar = () => {
   return (
     <nav
       className="w-full flex items-center justify-between px-6 py-4 shadow-md bg-white dark:bg-gray-900"
-      style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }} // polished font family
+      style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
     >
       {/* Logo */}
       <Link to="/" className="text-2xl font-extrabold text-primary tracking-wide">
@@ -122,14 +122,6 @@ const Navbar = () => {
               >
                 Contact
               </Link>
-               {
-          token==null ?(
-            <Link  to ="/login"><Button className="cursor-pointer" size="lg">Login</Button></Link>
-          ):(<Button className="cursor-pointer" onClick={Handlelogout}  size="lg">Logout</Button>)
-
-          
-
-        }
             </div>
 
             {/* Logout / Login button fixed at bottom */}
