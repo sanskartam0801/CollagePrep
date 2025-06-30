@@ -151,6 +151,15 @@ const Navbar = () => {
               <Link to="/contact" className="block text-lg font-medium" onClick={() => setOpen(false)}>
                 Contact
               </Link>
+
+              {
+          token==null ?(
+            <Link  to ="/login"><Button className="cursor-pointer" size="lg">Login</Button></Link>
+          ):(<Button className="cursor-pointer" onClick={Handlelogout}  size="lg">Logout</Button>)
+
+          
+
+        }
             </div>
 
             {/* Login / profile (bottom) */}
