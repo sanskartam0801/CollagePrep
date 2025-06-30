@@ -16,12 +16,38 @@ import mainHero from "@/assets/hero-section-image2.jpg";
 
 import useFormStore from "@/store/useFormStore";
 import useRedirectStore from "@/store/useRedirectStore";
+import useApiHandler from "@/hooks/useapicall";
 // import { useAuth } from "@clerk/clerk-react";
 
 const Main = () => {
   const resetform= useFormStore((state)=>state.resetForm)
   const navigate = useNavigate();
   // const { getToken, isSignedIn } = useAuth();
+
+  const apicaller=useApiHandler();
+  const [subjectarr,setSubjectarr]= useState([]);
+  useEffect(()=>{
+
+    const getavaialblesubjects= async ()=>{
+      const response= await apicaller("/api/auth/getuploadedsibject","GET");
+      console.log("subjectresponse",response);
+      if(response?.data?.success)
+      {
+        setSubjectarr(response?.data?.subjectarray);
+
+      }
+
+      
+
+    }
+
+
+    getavaialblesubjects();
+  },[])
+
+
+
+
   useEffect(() => {
   resetform();
 }, []);
@@ -154,14 +180,25 @@ const Main = () => {
             </Button>
           </div>
         </div>
+                    {/* subject available */}
+       <div className="w-full md:w-1/2 flex flex-col gap-4 p-4 rounded-2xl shadow-xl bg-white dark:bg-zinc-900 transition-all">
+  <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+    Subjects We Have
+  </h2>
 
-        <div className="w-full md:w-1/2">
-          <img
-            src={mainHero}
-            alt="Study Resources"
-            className="w-full h-auto rounded-xl shadow-lg"
-          />
-        </div>
+  <ul className="space-y-3 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-400 scrollbar-track-zinc-100 dark:scrollbar-thumb-zinc-700 dark:scrollbar-track-zinc-800">
+    {subjectarr.map((subject, index) => (
+      <li
+        key={index}
+        className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-gray-800 dark:text-white rounded-xl shadow-sm hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200 cursor-pointer"
+      >
+        {subject}
+      </li>
+    ))}
+  </ul>
+</div>
+
+
       </section>
 
       {/* Features Section */}
