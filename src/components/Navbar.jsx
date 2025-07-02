@@ -13,7 +13,19 @@ const Navbar = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const apicaller = useApiHandler()
-  const fullname = Cookies.get("fullname")
+  const [fullname, setFullname] = useState(Cookies.get("fullname") || "")
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    const name = Cookies.get("fullname")
+    if (name && name !== fullname) {
+      setFullname(name)
+    }
+  }, 500) // Poll every 500ms or adjust as needed
+
+  return () => clearInterval(interval)
+}, [fullname])
+
 
   // Detect large screen for showing welcome text
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024)
