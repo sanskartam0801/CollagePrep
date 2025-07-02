@@ -200,7 +200,7 @@ const subjectsToShow = searchval.trim() === '' ? subjectarr : filteredSubjects;
 
    <div className="w-full md:w-1/2 flex flex-col gap-4 p-6 rounded-2xl shadow-2xl bg-white dark:bg-zinc-900 transition-all">
   <div className="flex flex-row justify-between items-center">
-    <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white mb-3">
+    <h2 className="lg:text-2xl text-lg font-extrabold text-gray-800 dark:text-white mb-3">
       📚 Subjects We Have
     </h2>
     <input
