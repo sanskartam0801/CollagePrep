@@ -135,14 +135,14 @@ useEffect(() => {
                 Contact
               </Link>
 
-              {
+{/*               {
           token==null ?(
             <Link  to ="/login"><Button className="cursor-pointer" size="lg">Login</Button></Link>
           ):(<Button className="cursor-pointer" onClick={Handlelogout}  size="lg">Logout</Button>)
 
           
 
-        }
+        } */}
             </div>
 
             {/* Logout / Login button fixed at bottom */}
