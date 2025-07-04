@@ -48,12 +48,14 @@ const LoginSignupPage = () => {
       console.log("res", response);
 
       const token = response?.data?.token;
-      console.log("token", token);
+      // console.log("token", token);
       if(response?.data?.success)
       {
         localStorage.setItem("token", token);
+          Cookies.set("token",token);
       Cookies.set("fullname", response?.data?.student?.firstname);
-      console.log("fullname",Cookies.get("fullname"));
+        
+      // console.log("fullname",Cookies.get("fullname"));
        
       
 
