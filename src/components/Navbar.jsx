@@ -49,7 +49,7 @@ useEffect(() => {
   }
 
   const isLoggedin = useSelector((state) => state.auth.isLoggedIn)
-  // const token = localStorage.getItem("token")
+  const token = localStorage.getItem("token")
    const token = Cookies.get("token");
 
   return (
