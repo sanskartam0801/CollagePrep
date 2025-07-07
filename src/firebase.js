@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBmj8nkiI_yujB5Kf3syyCD3iV6UfHkHXk",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "collegeprep-1cb67.firebaseapp.com",
   projectId: "collegeprep-1cb67",
   storageBucket: "collegeprep-1cb67.firebasestorage.app",
