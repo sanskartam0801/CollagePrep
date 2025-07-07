@@ -18,11 +18,13 @@ import gallery4 from '@/assets/gallery4.jpg';
 import gallery5 from '@/assets/gallery5.jpg';
 import gallery6 from '@/assets/gallery6.jpg';
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const galleryImages = [gallery1, gallery2, gallery3, gallery4, gallery5, gallery6];
 
 const Home = () => {
-  const token = localStorage.getItem("token");
+   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+
 
   const faqItems = [
     {
@@ -62,7 +64,7 @@ const Home = () => {
           <p className="text-base sm:text-lg text-muted-foreground">
             No more searching in different groups or websites. Everything is structured for you.
           </p>
-          {!token ? (
+          {!isLoggedIn ? (
             <Link to="/login">
               <Button size="lg" className="text-base sm:text-lg">
                 Get Started
