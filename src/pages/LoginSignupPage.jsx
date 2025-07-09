@@ -8,6 +8,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { updateProfile } from "firebase/auth";
 import {
   showErrorToast,
   showLoadingToast,
@@ -59,14 +60,21 @@ const LoginSignupPage = () => {
 
         dispatch(changeUserState(true));
         dispatch(setStudentName(userCredential.user.displayName || "Student"));
+        console.log("userCredential", userCredential);
+
+        localStorage.setItem("fullname", userCredential.user.displayName || "Student");
         showSuccessToast("Login successful");
         navigate("/main");
       } else {
+        showLoadingToast("Signing up...");
         const userCredential = await createUserWithEmailAndPassword(
           auth,
           formData.email,
           formData.password
         );
+        await updateProfile(userCredential.user, {
+          displayName: formData.fullname,
+        });
 
         dispatch(changeUserState(true));
         dispatch(setStudentName(formData.fullname));

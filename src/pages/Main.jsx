@@ -92,23 +92,24 @@ const Main = () => {
 
 
   // Handle form submission
-  const handleNext = () => {
-    setSubmitted(true);
+ const handleNext = (selectedSubject = subject) => {
+  setSubmitted(true);
+  console.log("subject", selectedSubject);
 
-    if (!year || !semester || !branch.trim() || !subject.trim()) {
-      toast.error("⚠️ All fields are required to proceed.");
-      return;
-    }
+  if (!selectedSubject.trim()) {
+    toast.error("⚠️ Subject is required.");
+    return;
+  }
 
-    setFormFilled(true);
+  setSubject(selectedSubject); // ensure form state is synced
+  setFormFilled(true);
 
-    toast.success("✅ Form submitted successfully!");
+  toast.success("✅ Form submitted successfully!");
 
-    setTimeout(() => {
-      navigate("/reading");
-
-    }, 500);
-  };
+  setTimeout(() => {
+    navigate("/reading");
+  }, 500);
+};
 
   // search function
   const handleChange = (e) => {
@@ -117,10 +118,10 @@ const Main = () => {
 
   }
   const filteredSubjects = subjectarr.filter((subject) =>
-  subject.toLowerCase().includes(searchval.toLowerCase())
-);
+    subject.toLowerCase().includes(searchval.toLowerCase())
+  );
 
-const subjectsToShow = searchval.trim() === '' ? subjectarr : filteredSubjects;
+  const subjectsToShow = searchval.trim() === '' ? subjectarr : filteredSubjects;
 
 
   return (
@@ -131,7 +132,8 @@ const subjectsToShow = searchval.trim() === '' ? subjectarr : filteredSubjects;
       <section className="flex flex-col md:flex-row items-center justify-between gap-10 px-6 max-w-7xl mx-auto min-h-[80vh]">
         <div className="w-full md:w-1/2 space-y-6">
           <h2 className="text-3xl font-bold">Get Started with Resources</h2>
-          <div className="space-y-4">
+          {/* perviouse we were using form for getting in reading page */}
+          {/* <div className="space-y-4">
             <div>
               <Label htmlFor="year">Select Year</Label>
               <Select
@@ -194,41 +196,58 @@ const subjectsToShow = searchval.trim() === '' ? subjectarr : filteredSubjects;
             <Button className="w-full mt-4" onClick={handleNext}>
               Next
             </Button>
-          </div>
+          </div> */}
         </div>
         {/* subject available */}
 
-   <div className="w-full md:w-1/2 flex flex-col gap-4 p-6 rounded-2xl shadow-2xl bg-white dark:bg-zinc-900 transition-all">
-  <div className="flex flex-row justify-between items-center">
-    <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white mb-3">
-      📚 Subjects We Have
-    </h2>
-    <input
-      type="search"
-      value={searchval}
-      onChange={(e) => setSearchval(e.target.value)}
-      placeholder="Search..."
-      className="p-1.5 bg-gray-100 rounded-md"
-    />
-  </div>
+        <div className="w-full md:w-1/2 flex flex-col gap-4 p-6 rounded-2xl shadow-2xl bg-white dark:bg-zinc-900 transition-all">
+          <div className="flex flex-row justify-between items-center">
+            <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white mb-3">
+              📚 Subjects We Have
+            </h2>
+            <input
+              type="search"
+              value={searchval}
+              onChange={(e) => setSearchval(e.target.value)}
+              placeholder="Search..."
+              className="p-1.5 bg-gray-100 rounded-md"
+            />
+          </div>
 
-  <ul className="space-y-3 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-400 scrollbar-track-zinc-100 dark:scrollbar-thumb-zinc-700 dark:scrollbar-track-zinc-800">
-    {(searchval.trim() === '' ? subjectarr : filteredSubjects).map((subject, index) => (
-      <li
-        key={index}
-        className="flex items-center gap-3 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-gray-800 dark:text-white rounded-xl shadow-sm hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all duration-200 cursor-pointer"
-      >
-        <HiOutlineBookOpen className="text-lg text-blue-500 dark:text-blue-400" />
-        <span className="font-medium">{subject}</span>
-      </li>
-    ))}
+          <ul className="space-y-3 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-400 scrollbar-track-zinc-100 dark:scrollbar-thumb-zinc-700 dark:scrollbar-track-zinc-800">
+            {(searchval.trim() === '' ? subjectarr : filteredSubjects).map((subject, index) => (
+              <div className="flex flex-row justify-between items-center" key={index}>
+                <li
+                  key={index}
+                  className="flex items-center gap-3 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-gray-800 dark:text-white rounded-xl shadow-sm hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all duration-200 cursor-pointer"
+                >
+                  <HiOutlineBookOpen className="text-lg text-blue-500 dark:text-blue-400" />
+                  <span className="font-medium">{subject}</span>
+                </li>
+                <Button
+                  className="text-white p-1.5"
+                  onClick={() => {
+                    handleNext(subject); // subject from `.map()` scope
+                  }}
+                >
+                  Get subjects
+                </Button>
 
-    {/* Optional: Show message when no matches found */}
-    {searchval.trim() !== '' && filteredSubjects.length === 0 && (
-      <li className="text-gray-500 dark:text-gray-400 px-4 py-2 italic">No subjects found.</li>
-    )}
-  </ul>
-</div>
+              </div>
+            ))}
+
+            {/* Optional: Show message when no matches found */}
+            {searchval.trim() !== '' && filteredSubjects.length === 0 && (
+              <div className="flex flex-row justify-between items-center">
+                <li className="text-gray-500 dark:text-gray-400 px-4 py-2 italic">No subjects found.</li>
+
+
+              </div>
+
+
+            )}
+          </ul>
+        </div>
 
 
 

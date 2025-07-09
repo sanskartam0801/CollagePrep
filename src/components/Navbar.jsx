@@ -24,9 +24,12 @@ const Navbar = () => {
 
 // dicebear image genrator
 const student= localStorage.getItem("fullname") ;
-const image_url = useSelector((state) => state.auth.studentImage) || null;
+console.log("Student Name:", student);
 
-  const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(student)}`;
+const image_url = useSelector((state) => state.auth.studentImage) || null;
+  const studentName = useSelector((state) => state.auth.studentName)
+
+  const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(studentName)}`;
       
 
 
@@ -45,7 +48,7 @@ const image_url = useSelector((state) => state.auth.studentImage) || null;
   console.log("Image URL:", image_url);
   
   // ******************* student name*******************
-  const studentName = useSelector((state) => state.auth.studentName)
+
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
 
   // check user is logged in or not 
