@@ -1,154 +1,129 @@
-import React, { useState, useEffect } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import React, { useState, useEffect, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Menu } from 'lucide-react'
+import { Menu, LogOut } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
-import Cookies from 'js-cookie'
 import { changeUserState, clearLogoutFlag } from '@/redux/slices/Authslice'
-import useApiHandler from '@/hooks/useapicall'
-import { getAuth, onAuthStateChanged,signOut } from "firebase/auth";
-
+import { getAuth, signOut } from "firebase/auth"
 
 const Navbar = () => {
-
-// *********** name convertor**********
-  const formatName = (name) => {
-    if(name === null || name === undefined || name.trim() === "") 
-      return null
-  return name
-    .split(" ")
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
-};
-
-// dicebear image genrator
-const student= localStorage.getItem("fullname") ;
-console.log("Student Name:", student);
-
-const image_url = useSelector((state) => state.auth.studentImage) || null;
-  const studentName = useSelector((state) => state.auth.studentName)
-
-  const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(studentName)}`;
-      
-
-
-
-
   const [open, setOpen] = useState(false)
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const apicaller = useApiHandler()
-  const [userexist,setuserExist]= useState(false);
-  const auth = getAuth();
-  // const fullname = Cookies.get("fullname")
-  // google image url from google firebase
-  // const image_url= useSelector((state)=>state.auth.studentImage)
-  
-  console.log("Image URL:", image_url);
-  
-  // ******************* student name*******************
+  const auth = getAuth()
 
-  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const studentName = useSelector((state) => state.auth.studentName)
+  const image_url = useSelector((state) => state.auth.studentImage) || null
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
+  const fullnameLocal = localStorage.getItem("fullname")
 
-  // check user is logged in or not 
-  // 
-
-
-  
-
-  // Detect large screen for showing welcome text
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024)
+  const [showDropdown, setShowDropdown] = useState(false)
+  const dropdownRef = useRef(null)
+
+  const formatName = (name) => {
+    if (!name || name.trim() === "") return null
+    return name
+      .split(" ")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ")
+  }
+
+  const fallbackAvatar = "https://images.unsplash.com/photo-1544725176-7c40e5a2c9f9?w=80&h=80&fit=crop"
+
+  const avatarUrl = image_url
+    ? image_url
+    : studentName
+      ? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(studentName)}`
+      : fallbackAvatar
+
   useEffect(() => {
     const handleResize = () => setIsLargeScreen(window.innerWidth >= 1024)
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
   const Handlelogout = async () => {
     try {
-      // const response = await apicaller("/api/auth/logout", "POST")
-      // if (response?.data?.success) {
-      //   localStorage.removeItem("token")
-     
-      signOut(auth);
-         dispatch(changeUserState(false))
-         dispatch(clearLogoutFlag(true));
-        navigate("/")
-      }
-     catch (e) {
-      console.log("some error occured")
+      signOut(auth)
+      dispatch(changeUserState(false))
+      dispatch(clearLogoutFlag(true))
+      navigate("/")
+    } catch (e) {
+      console.log(`some error occurred: ${e}`)
     }
   }
 
-  // const isLoggedin = useSelector((state) => state.auth.isLoggedIn)
-  // const token = localStorage.getItem("token")
-
   return (
-    <nav
-      className="w-full flex items-center justify-between px-6 py-4 shadow-md bg-white dark:bg-gray-900"
+    <nav className="w-full flex items-center justify-between px-6 py-4 shadow-md bg-white dark:bg-gray-900 transition-all"
       style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
     >
       {/* Logo */}
-      <Link to="/" className="text-2xl font-extrabold text-primary tracking-wide">
-        CollegePrep
+      <Link to="/" className="flex-shrink-0">
+        <span className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-blue-600 flex items-center gap-2">
+          🎓 <span className="text-gray-900 dark:text-white">Collage</span>
+          <span className="text-yellow-500">Prep</span>
+        </span>
       </Link>
 
-      {/* Welcome message for large screen */}
-      <span className="text-base font-semibold tracking-wide">
-  {isLargeScreen && isLoggedIn && (studentName||student)
-    ? `Hey! ${formatName(studentName) || student} You’re just one step away from mastering your semester`
-    : ""}
-</span>
+      {/* Welcome Message */}
+      <span className="hidden lg:block text-sm lg:text-base font-semibold tracking-wide max-w-[40%] truncate -ml-8">
+        {isLargeScreen && isLoggedIn && (studentName || fullnameLocal) &&
+          `Hey! ${formatName(studentName) || fullnameLocal} — You’re just one step away from mastering your semester`}
+      </span>
 
+      {/* Desktop Menu */}
+      <div className="hidden md:flex items-center gap-6 lg:gap-8 text-sm sm:text-base font-medium tracking-wide">
+        <Link to="/main" className="hover:underline">Main</Link>
+        <Link to="/upload" className="hover:underline">Upload</Link>
+        <Link to="/contact" className="hover:underline">Contact Us</Link>
 
-      {/* Desktop menu */}
-      <div className="hidden md:flex items-center gap-8 text-lg font-medium tracking-wide">
-  <Link to="/main" className="hover:underline">
-    Read
-  </Link>
-  <Link to="/upload" className="hover:underline">
-    Upload
-  </Link>
-  <Link to="/contact" className="hover:underline">
-    Contact Us
-  </Link>
+        {isLoggedIn && (
+          <div className="relative" ref={dropdownRef}>
+            <div
+              className="w-[44px] h-[44px] rounded-full overflow-hidden border-2 border-white  cursor-pointer"
+              onClick={() => setShowDropdown(prev => !prev)}
+            >
+              <img
+                src={avatarUrl}
+                alt="User Avatar"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
 
-  {/* ✅ Image Avatar with Glow */}
-  {
-    
-      isLoggedIn && (
-        <div className="w-[48px] h-[48px] rounded-full overflow-hidden border-2 border-white shadow-md shadow-blue-400 animate-in">
-    <img
-      src={image_url || avatarUrl}
-      alt="User Avatar"
-      className="w-full h-full object-cover rounded-full"
-    />
-  </div>
-      )
-    
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-36 bg-white dark:bg-gray-800 rounded-xl shadow-lg py-2 z-50 border border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={Handlelogout}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-black rounded-md hover:bg-gray-800 transition-all"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
-  }
-  
+        {!isLoggedIn && (
+          <Link to="/login">
+            <Button size="lg" className="cursor-pointer font-semibold tracking-wide">Login</Button>
+          </Link>
+        )}
+      </div>
 
-  {!isLoggedIn ? (
-    <Link to="/login">
-      <Button size="lg" className="cursor-pointer font-semibold tracking-wide">
-        Login
-      </Button>
-    </Link>
-  ) : (
-    <Button
-      size="lg"
-      onClick={Handlelogout}
-      className="cursor-pointer font-semibold tracking-wide"
-    >
-      Logout
-    </Button>
-  )}
-</div>
-
-      {/* Mobile hamburger */}
+      {/* Mobile Hamburger Menu */}
       <div className="md:hidden">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
@@ -162,49 +137,12 @@ const image_url = useSelector((state) => state.auth.studentImage) || null;
             className="w-3/4 sm:w-1/2 p-6 flex flex-col justify-between"
             style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
           >
-            {/* Menu items */}
-            <div className="space-y-6">
-              <Link
-                to="/reading"
-                className="block text-lg font-medium hover:underline"
-                onClick={() => setOpen(false)}
-              >
-                Read
-              </Link>
-              <Link
-                to="/upload"
-                className="block text-lg font-medium hover:underline"
-                onClick={() => setOpen(false)}
-              >
-                Upload
-              </Link>
-              <Link
-                to="/contact"
-                className="block text-lg font-medium hover:underline"
-                onClick={() => setOpen(false)}
-              >
-                Contact
-              </Link>
-
-              
-
-            
-
-
-
-              {
-
-
-                !isLoggedIn ? (
-                  <Link to="/login"><Button className="cursor-pointer" size="lg">Login</Button></Link>
-                ) : (<Button className="cursor-pointer" onClick={Handlelogout} size="lg">Logout</Button>)
-
-
-
-              }
+            <div className="space-y-6 text-base">
+              <Link to="/main" className="block font-medium hover:underline" onClick={() => setOpen(false)}>Main</Link>
+              <Link to="/upload" className="block font-medium hover:underline" onClick={() => setOpen(false)}>Upload</Link>
+              <Link to="/contact" className="block font-medium hover:underline" onClick={() => setOpen(false)}>Contact</Link>
             </div>
 
-            {/* Logout / Login button fixed at bottom */}
             <div className="mt-auto pt-6 border-t">
               {!isLoggedIn ? (
                 <Link to="/login" onClick={() => setOpen(false)}>

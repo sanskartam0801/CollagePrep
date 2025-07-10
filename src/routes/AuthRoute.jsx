@@ -29,7 +29,7 @@ const AuthRoute = ({ element }) => {
 
   if (!isLoggedIn) {
     
-        showErrorToast("Login Please to access");
+        showErrorToast("Please login to access content");
     return <LoginSignupPage />;
   }
 
