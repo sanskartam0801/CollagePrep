@@ -4,31 +4,41 @@ import { createSlice } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
 
 const initialState = {
-  isLoggedIn: !!Cookies.get("token") ,
+  isLoggedIn: false,
   justLoggedOut: false,
-  studentname:"" // true if token exists, false otherwise
+  studentName: "",
+  studentImage: "",   // 🔹 NEW: store photoURL here
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     changeUserState: (state, action) => {
       state.isLoggedIn = action.payload;
     },
     logoutUser: (state) => {
-      Cookies.remove("token");           // ⛔ Clear the token from cookies
-      state.isLoggedIn = false;          // 🔐 Reset login status
+      Cookies.remove("token");
+      state.isLoggedIn = false;
     },
-     clearLogoutFlag: (state) => {
+    clearLogoutFlag: (state) => {
       state.justLoggedOut = false;
     },
-    studentfullname:(state)=>{
-      state.studentname= action.payload
-    }
-
-  }
+    setStudentName: (state, action) => {
+      state.studentName = action.payload;
+    },
+    setStudentImage: (state, action) => {
+      state.studentImage = action.payload;
+    },
+  },
 });
 
-export const { changeUserState, logoutUser } = authSlice.actions;
+export const {
+  changeUserState,
+  logoutUser,
+  clearLogoutFlag,
+  setStudentName,
+  setStudentImage,  // 🔹 Export the new action
+} = authSlice.actions;
+
 export default authSlice.reducer;

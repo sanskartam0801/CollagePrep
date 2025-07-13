@@ -4,99 +4,137 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import useApiHandler from "@/hooks/useapicall";
-import Cookies from "js-cookie";
+import { Eye, EyeOff } from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
 import { useDispatch } from "react-redux";
-import { changeUserState } from "@/redux/slices/Authslice";
 import { useNavigate } from "react-router-dom";
-import { showErrorToast } from "@/utilities/toastutils";
-import { Cookie, Eye, EyeOff } from "lucide-react";
-import { toast } from "react-toastify";
+import { updateProfile } from "firebase/auth";
+import {
+  showErrorToast,
+  showLoadingToast,
+  showSuccessToast,
+} from "@/utilities/toastutils";
+import {
+  changeUserState,
+  setStudentImage,
+  setStudentName,
+} from "@/redux/slices/Authslice";
+
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+
+import { app } from "../firebase";
+
+const provider = new GoogleAuthProvider();
+const auth = getAuth(app);
 
 const LoginSignupPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
   } = useForm();
-  const apicaller = useApiHandler();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const onSubmit = async (formData) => {
     if (!isLogin && formData.password !== formData.confirmpassword) {
       return showErrorToast("Passwords do not match");
     }
 
-    const payload = isLogin
-      ? { email: formData.email, password: formData.password }
-      : {
-          fullname: formData.fullname,
-          email: formData.email,
-          password: formData.password,
-          confirmpassword: formData.confirmpassword,
-        };
-
-    const url = isLogin ? "/api/auth/login" : "/api/auth/signup";
-
     try {
-      const response = await apicaller(url, "POST", payload);
-      console.log("res", response);
+      if (isLogin) {
+        showLoadingToast("Logging in...");
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
 
-      const token = response?.data?.token;
-      // console.log("token", token);
-      if(response?.data?.success)
-      {
-        localStorage.setItem("token", token);
-          Cookies.set("token",token);
-      Cookies.set("fullname", response?.data?.student?.firstname);
-        
-      // console.log("fullname",Cookies.get("fullname"));
-       
-      
+        dispatch(changeUserState(true));
+        dispatch(setStudentName(userCredential.user.displayName || "Student"));
 
-      dispatch(changeUserState(true));
-      
-      navigate("/main");
+        localStorage.setItem("fullname", userCredential.user.displayName || "Student");
+        showSuccessToast("Login successful");
+        navigate("/main");
+      } else {
+        showLoadingToast("Signing up...");
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
 
+        await updateProfile(userCredential.user, {
+          displayName: formData.fullname,
+        });
+
+        dispatch(changeUserState(true));
+        dispatch(setStudentName(formData.fullname));
+        showSuccessToast("Signup successful");
+        navigate("/main");
       }
-      
+    } catch (error) {
+      showErrorToast(error.message || "Something went wrong");
+    }
+  };
 
-      
-    } catch (e) {
-      showErrorToast(e.message || "Something went wrong");
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // const idToken = await user.getIdToken(); // if needed for backend
+      dispatch(setStudentName(user.displayName));
+      dispatch(setStudentImage(user.photoURL));
+      dispatch(changeUserState(true));
+      showSuccessToast("Logged in with Google");
+      navigate("/main");
+    } catch (error) {
+      showErrorToast(error.message || "Google Sign-in failed");
     }
   };
 
   return (
-    <div className="bg-white text-gray-800 pb-24 overflow-y-hidden">
+    <div className="bg-white text-gray-800 pb-24">
       <section className="flex flex-col md:flex-row min-h-screen">
+        {/* ✅ Form Section */}
         <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12">
           <Card className="w-full max-w-md shadow-2xl">
-            <CardContent>
-              <h2 className="text-2xl font-bold text-center mb-4">
+            <CardContent className="space-y-6">
+              <h2 className="text-2xl font-bold text-center">
                 {isLogin ? "Login to CollagePrep" : "Sign Up for CollagePrep"}
               </h2>
+
+              {/* Google login */}
+              <Button
+                onClick={handleGoogleSignIn}
+                className="flex items-center justify-center gap-3 w-full text-base font-medium"
+              >
+                <FcGoogle className="text-xl" />
+                {isLogin ? "Login with Google" : "Sign up with Google"}
+              </Button>
 
               <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
                 {!isLogin && (
                   <div className="flex flex-col gap-1.5">
                     <Label>Student Name</Label>
                     <Input
-                      type="text"
-                      {...register("fullname", {
-                        required: "Full name is required",
-                      })}
-                      placeholder="Your name"
+                      {...register("fullname", { required: "Name is required" })}
+                      placeholder="Your full name"
                     />
                     {errors.fullname && (
-                      <span className="text-red-500 text-sm">
-                        {errors.fullname.message}
-                      </span>
+                      <p className="text-sm text-red-500">{errors.fullname.message}</p>
                     )}
                   </div>
                 )}
@@ -109,73 +147,68 @@ const LoginSignupPage = () => {
                       required: "Email is required",
                       pattern: {
                         value: /\S+@\S+\.\S+/,
-                        message: "Invalid email format",
+                        message: "Invalid email",
                       },
                     })}
                     placeholder="you@example.com"
                   />
                   {errors.email && (
-                    <span className="text-red-500 text-sm">
-                      {errors.email.message}
-                    </span>
+                    <p className="text-sm text-red-500">{errors.email.message}</p>
                   )}
                 </div>
 
+                {/* Password Field */}
                 <div className="flex flex-col gap-1.5 relative">
                   <Label>Password</Label>
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    {...register("password", {
-                      required: "Password is required",
-                      minLength: {
-                        value: 6,
-                        message: "Password must be at least 6 characters",
-                      },
-                    })}
-                    placeholder="••••••••"
-                  />
-                  <span
-                    className="absolute right-3 top-1/2 transform  cursor-pointer text-gray-500"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </span>
-
-                  {errors.password && (
-                    <span className="text-red-500 text-sm">
-                      {errors.password.message}
-                    </span>
-                  )}
-                </div>
-
-                {!isLogin && (
-                  <div className="flex flex-col gap-1.5 relative">
-                    <Label>Confirm Password</Label>
+                  <div className="relative">
                     <Input
-                      type={showConfirmPassword ? "text" : "password"}
-                      {...register("confirmpassword", {
-                        required: "Confirm password is required",
-                        validate: (value) =>
-                          value === watch("password") ||
-                          "Passwords do not match",
+                      type={showPassword ? "text" : "password"}
+                      {...register("password", {
+                        required: "Password is required",
+                        minLength: {
+                          value: 6,
+                          message: "Minimum 6 characters",
+                        },
                       })}
                       placeholder="••••••••"
                     />
                     <span
-                      className="absolute right-3 top-1/2 transform cursor-pointer text-gray-500"
-                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"
                     >
-                      {showConfirmPassword ? (
-                        <EyeOff size={18} />
-                      ) : (
-                        <Eye size={18} />
-                      )}
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </span>
+                  </div>
+                  {errors.password && (
+                    <p className="text-sm text-red-500">{errors.password.message}</p>
+                  )}
+                </div>
 
-                    {errors.confirmpassword && (
-                      <span className="text-red-500 text-sm">
-                        {errors.confirmpassword.message}
+                {/* Confirm Password Field */}
+                {!isLogin && (
+                  <div className="flex flex-col gap-1.5 relative">
+                    <Label>Confirm Password</Label>
+                    <div className="relative">
+                      <Input
+                        type={showConfirmPassword ? "text" : "password"}
+                        {...register("confirmpassword", {
+                          required: "Confirm password is required",
+                          validate: (value) =>
+                            value === watch("password") || "Passwords do not match",
+                        })}
+                        placeholder="••••••••"
+                      />
+                      <span
+                        onClick={() => setShowConfirmPassword((prev) => !prev)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"
+                      >
+                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </span>
+                    </div>
+                    {errors.confirmpassword && (
+                      <p className="text-sm text-red-500">
+                        {errors.confirmpassword.message}
+                      </p>
                     )}
                   </div>
                 )}
@@ -185,10 +218,9 @@ const LoginSignupPage = () => {
                 </Button>
               </form>
 
-              <p className="text-center text-sm text-gray-600 mt-4">
-                {isLogin
-                  ? "Don't have an account?"
-                  : "Already have an account?"}{" "}
+              {/* Switch Login/Signup */}
+              <p className="text-center text-sm text-gray-600">
+                {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
                 <button
                   className="text-indigo-600 hover:underline"
                   onClick={() => setIsLogin(!isLogin)}
@@ -200,12 +232,12 @@ const LoginSignupPage = () => {
           </Card>
         </div>
 
-        {/* Image Section */}
-        <div className="hidden md:block w-full md:w-1/2">
+        {/* ✅ Image Section */}
+        <div className="hidden md:block md:w-1/2">
           <img
             src="https://illustrations.popsy.co/gray/studying.svg"
             alt="Student Illustration"
-            className="w-full h-full rounded-xl shadow-lg"
+            className="w-full h-full object-cover rounded-xl shadow-xl"
           />
         </div>
       </section>

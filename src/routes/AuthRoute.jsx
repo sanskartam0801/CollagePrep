@@ -1,32 +1,38 @@
-import React from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
-import Cookies from "js-cookie";
+import React, { useEffect, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import LoginSignupPage from "@/pages/LoginSignupPage";
 import { showErrorToast } from "@/utilities/toastutils";
+import { clearLogoutFlag } from "@/redux/slices/Authslice";
 
 const AuthRoute = ({ element }) => {
-  const location = useLocation();
+  const dispatch = useDispatch();
 
- 
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const justLoggedOut = useSelector((state) => state.auth.justLoggedOut);
 
-  const token = localStorage.getItem("token");
-  // console.log("authrou",token);
-  
- 
-  
+  const hasShownToast = useRef(false);
 
+  useEffect(() => {
+    // Run only once when not logged in
+    if (!isLoggedIn) {
+      if (justLoggedOut) {
+        // Reset the logout flag after handling
+        dispatch(clearLogoutFlag(false));
+      } else if (!hasShownToast.current) {
+        hasShownToast.current = true;
+      }
+    } else {
+      // Reset toast flag when user logs in
+      hasShownToast.current = false;
+    }
+  }, [isLoggedIn, justLoggedOut, dispatch]);
 
- 
-
-  // Redirect to /login if not logged in or token is missing
-  if ( !token ) {
-    showErrorToast("Login Please to access");
-    return <LoginSignupPage></LoginSignupPage>;
+  if (!isLoggedIn) {
+    
+        showErrorToast("Please login to access content");
+    return <LoginSignupPage />;
   }
 
-  // Authenticated: render the protected element
-  else
   return element;
 };
 
