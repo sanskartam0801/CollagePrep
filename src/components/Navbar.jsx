@@ -72,7 +72,7 @@ const Navbar = () => {
       {/* Logo */}
       <Link to="/" className="flex-shrink-0">
         <span className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-blue-600 flex items-center gap-2">
-          🎓 <span className="text-gray-900 dark:text-white">Collage</span>
+          🎓 <span className="text-gray-900 dark:text-white">College</span>
           <span className="text-yellow-500">Prep</span>
         </span>
       </Link>
