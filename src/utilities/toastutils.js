@@ -79,7 +79,7 @@ export const showErrorToast = (message, options = {}, dismiss = false) => {
 // Show loading toast
 export const showLoadingToast = (message, options = {}, dismiss = false) => {
   const toastId = toast.loading(message, {
-    duration: 1000,
+    duration: 100,
     position: "bottom-right",
     style: customPromiseStyles.loading,
     ...options,
